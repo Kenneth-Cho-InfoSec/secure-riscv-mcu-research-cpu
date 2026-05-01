@@ -1,0 +1,72 @@
+00000000: 04000093    addi x1, x0, trap_vector
+00000004: 30509073    csrw mtvec, x1
+00000008: 08000093    addi x1, x0, 128
+0000000c: 30409073    csrw mie, x1
+00000010: 00800093    addi x1, x0, 8
+00000014: 3000a073    csrs mstatus, x1
+00000018: 30402103    <wait_irq> lw x2, 772(x0)
+0000001c: fe010ee3    beq x2, x0, wait_irq
+00000020: 00800093    addi x1, x0, 8
+00000024: 3000b073    csrc mstatus, x1
+00000028: 7c0022f3    csrr x5, pmpbase0
+0000002c: 12300313    addi x6, x0, 291
+00000030: 7c031073    csrw pmpbase0, x6
+00000034: 7c0023f3    csrr x7, pmpbase0
+00000038: 06729263    bne x5, x7, fail
+0000003c: 0540006f    jal x0, enter_user
+00000040: 34202573    <trap_vector> csrr x10, mcause
+00000044: 800005b7    lui x11, 0x80000
+00000048: 00758593    addi x11, x11, 7
+0000004c: 00b50c63    beq x10, x11, handle_timer
+00000050: 00700593    addi x11, x0, 7
+00000054: 00b50e63    beq x10, x11, handle_store_fault
+00000058: 00800593    addi x11, x0, 8
+0000005c: 02b50463    beq x10, x11, handle_ecall
+00000060: 03c0006f    jal x0, fail
+00000064: 00100613    <handle_timer> addi x12, x0, 1
+00000068: 30c02223    sw x12, 772(x0)
+0000006c: 30200073    mret
+00000070: 343026f3    <handle_store_fault> csrr x13, mtval
+00000074: 02069463    bne x13, x0, fail
+00000078: 11400713    addi x14, x0, after_fault
+0000007c: 34171073    csrw mepc, x14
+00000080: 30200073    mret
+00000084: 00100793    <handle_ecall> addi x15, x0, 1
+00000088: 30f02023    sw x15, 768(x0)
+0000008c: 0180006f    jal x0, halt
+00000090: 10000093    <enter_user> addi x1, x0, user_start
+00000094: 34109073    csrw mepc, x1
+00000098: 30200073    mret
+0000009c: fff00f93    <fail> addi x31, x0, -1
+000000a0: 31f02023    sw x31, 768(x0)
+000000a4: 0000006f    <halt> jal x0, halt
+000000a8: 00000013    nop
+000000ac: 00000013    nop
+000000b0: 00000013    nop
+000000b4: 00000013    nop
+000000b8: 00000013    nop
+000000bc: 00000013    nop
+000000c0: 00000013    nop
+000000c4: 00000013    nop
+000000c8: 00000013    nop
+000000cc: 00000013    nop
+000000d0: 00000013    nop
+000000d4: 00000013    nop
+000000d8: 00000013    nop
+000000dc: 00000013    nop
+000000e0: 00000013    nop
+000000e4: 00000013    nop
+000000e8: 00000013    nop
+000000ec: 00000013    nop
+000000f0: 00000013    nop
+000000f4: 00000013    nop
+000000f8: 00000013    nop
+000000fc: 00000013    nop
+00000100: 00700113    <user_start> addi x2, x0, 7
+00000104: 20202023    sw x2, 512(x0)
+00000108: 20002183    lw x3, 512(x0)
+0000010c: 00311663    bne x2, x3, user_fail
+00000110: 00202023    sw x2, 0(x0)
+00000114: 00000073    <after_fault> ecall
+00000118: ff700f93    <user_fail> addi x31, x0, -9
+0000011c: 00000073    ecall
